@@ -1,3 +1,20 @@
+// Package main is the entry point
+//
+// @title           To-Do API
+// @version         1.0.0
+// @description     A RESTful API for managing tasks, tags, and attachments with JWT authentication.
+// @termsOfService  http://example.com/terms/
+//
+// @contact.name   Tony Blaise
+// @contact.email  tonyblaise790@gmail.com
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+//
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter the token with the `Bearer ` prefix, e.g. "Bearer abcde12345"
 package main
 
 import (
@@ -10,6 +27,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/Tonyblaise/to-do/docs"
 	"github.com/Tonyblaise/to-do/internal/config"
 	"github.com/Tonyblaise/to-do/internal/database"
 	"github.com/Tonyblaise/to-do/internal/handlers"
@@ -18,8 +36,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
-
-
 
 func main() {
 	

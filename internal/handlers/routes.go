@@ -3,11 +3,12 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
-	"github.com/gorilla/mux"
 
 	"github.com/Tonyblaise/to-do/internal/config"
-	"github.com/Tonyblaise/to-do/internal/repository"
 	"github.com/Tonyblaise/to-do/internal/middleware"
+	"github.com/Tonyblaise/to-do/internal/repository"
+	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func RegisterRoutes(r *mux.Router, db *sql.DB, cfg *config.Config) {
@@ -64,7 +65,6 @@ func RegisterRoutes(r *mux.Router, db *sql.DB, cfg *config.Config) {
 	
 	r.HandleFunc("/ws", authMW(http.HandlerFunc(hub.WSHandler)).ServeHTTP)
 
-
-
-
+	// Swagger UI
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 }

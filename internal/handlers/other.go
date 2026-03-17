@@ -26,6 +26,19 @@ type TagHandler struct {
 func NewTagHandler(tags *repository.TagRepository) *TagHandler {
 	return &TagHandler{tags: tags}
 }
+// Create godoc
+// @Summary      Create a tag
+// @Description  Create a new tag for the authenticated user
+// @Tags         tags
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body  body      models.CreateTagRequest  true  "Tag payload"
+// @Success      201   {object}  models.Tag
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      409   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
+// @Router       /tags [post]
 func (h *TagHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 
@@ -56,6 +69,15 @@ func (h *TagHandler) Create(w http.ResponseWriter, r *http.Request) {
 	response.Created(w, tag)
 }
 
+// List godoc
+// @Summary      List tags
+// @Description  Get all tags for the authenticated user
+// @Tags         tags
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {array}   models.Tag
+// @Failure      500  {object}  models.ErrorResponse
+// @Router       /tags [get]
 func (h *TagHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	userID := middleware.GetUserID(r.Context())
@@ -70,6 +92,16 @@ func (h *TagHandler) List(w http.ResponseWriter, r *http.Request) {
 	response.OK(w, tags)
 }
 
+// Delete godoc
+// @Summary      Delete a tag
+// @Description  Delete a tag by ID
+// @Tags         tags
+// @Security     BearerAuth
+// @Param        id   path  string  true  "Tag ID"
+// @Success      204
+// @Failure      404  {object}  models.ErrorResponse
+// @Failure      500  {object}  models.ErrorResponse
+// @Router       /tags/{id} [delete]
 func (h *TagHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 
@@ -95,6 +127,20 @@ type AttachmentHandler struct {
 func NewAttachmentHandler(attachments *repository.AttachmentRepository, tasks *repository.TaskRepository, cfg *config.Config) *AttachmentHandler {
 	return &AttachmentHandler{attachments: attachments, tasks: tasks, cfg: cfg}
 }
+// Upload godoc
+// @Summary      Upload attachment
+// @Description  Upload a file attachment to a task (jpeg, png, gif, pdf; max size from config)
+// @Tags         attachments
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id    path      string  true  "Task ID"
+// @Param        file  formData  file    true  "File to upload"
+// @Success      201   {object}  models.Attachment
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      404   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
+// @Router       /tasks/{id}/attachments [post]
 func (h *AttachmentHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 	taskID := mux.Vars(r)["id"]
@@ -169,6 +215,17 @@ func (h *AttachmentHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	response.Created(w, attachment)
 }
 
+// Download godoc
+// @Summary      Download attachment
+// @Description  Download a file attachment by ID
+// @Tags         attachments
+// @Produce      octet-stream
+// @Security     BearerAuth
+// @Param        id   path  string  true  "Attachment ID"
+// @Success      200  {file}    binary
+// @Failure      404  {object}  models.ErrorResponse
+// @Failure      500  {object}  models.ErrorResponse
+// @Router       /attachments/{id} [get]
 func (h *AttachmentHandler) Download(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 	attachmentID := mux.Vars(r)["id"]
@@ -187,6 +244,16 @@ func (h *AttachmentHandler) Download(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, attachment.Filename))
 	http.ServeFile(w, r, attachment.Path)
 }
+// Delete godoc
+// @Summary      Delete attachment
+// @Description  Delete a file attachment by ID
+// @Tags         attachments
+// @Security     BearerAuth
+// @Param        id   path  string  true  "Attachment ID"
+// @Success      204
+// @Failure      404  {object}  models.ErrorResponse
+// @Failure      500  {object}  models.ErrorResponse
+// @Router       /attachments/{id} [delete]
 func (h *AttachmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 	attachmentID := mux.Vars(r)["id"]
@@ -205,7 +272,14 @@ func (h *AttachmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	response.NoContent(w)
 }
 
- func HealthCheck(db interface{ Ping() error }) http.HandlerFunc {
+// HealthCheck godoc
+// @Summary      Health check
+// @Description  Returns the health status of the API and database
+// @Tags         health
+// @Produce      json
+// @Success      200  {object}  models.HealthResponse
+// @Router       /health [get]
+func HealthCheck(db interface{ Ping() error }) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		dbStatus := "ok"
 		if err := db.Ping(); err != nil {

@@ -104,21 +104,21 @@ func (r *TaskRepository) GetByID(taskID string, userID string) (*models.Task, er
 		return nil, fmt.Errorf("querying task: %w", err)
 	}
 
-	// Load tags
+	
 	tags, err := r.getTagsForTask(task.ID)
 	if err != nil {
 		return nil, err
 	}
 	task.Tags = tags
 
-	// Load subtasks
+
 	subtasks, err := r.getSubtasks(task.ID, userID)
 	if err != nil {
 		return nil, err
 	}
 	task.Subtasks = subtasks
 
-	// Load attachments
+
 	attachments, err := r.getAttachments(task.ID)
 	if err != nil {
 		return nil, err

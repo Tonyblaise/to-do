@@ -22,12 +22,25 @@ func NewAuthHandler(users *repository.UserRepository, cfg *config.Config) *AuthH
 }
 
 
+// Signup godoc
+// @Summary      Register a new user
+// @Description  Create a new user account and return a JWT token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      models.SignupRequest   true  "Signup payload"
+// @Success      201   {object}  models.AuthResponse
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      409   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
+// @Router       /auth/signup [post]
 func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	var req models.SignupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.BadRequest(w, "invalid JSON body")
 		return
 	}
+	
 
 	if errs := services.ValidateSignUp(&req); errs != nil {
 		response.BadRequest(w, "validation failed", errs.Fields)
@@ -54,6 +67,18 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 }
 
 
+// Login godoc
+// @Summary      Login
+// @Description  Authenticate a user and return a JWT token
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      models.LoginRequest  true  "Login payload"
+// @Success      200   {object}  models.AuthResponse
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      401   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
