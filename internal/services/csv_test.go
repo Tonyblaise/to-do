@@ -110,7 +110,10 @@ func TestExportTasksCSV_NilDueDate(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	records, _ := csv.NewReader(r).ReadAll()
+	records, err := csv.NewReader(r).ReadAll()
+	if err != nil {
+		t.Fatalf("failed to parse CSV: %v", err)
+	}
 	if records[1][5] != "" {
 		t.Errorf("expected empty due date, got %q", records[1][5])
 	}
@@ -125,7 +128,7 @@ func TestExportTasksCSV_NoTags(t *testing.T) {
 			Priority:  models.PriorityLow,
 			Tags:      nil,
 			CreatedAt: time.Now(),
-			UpdatedAt:time.Now(),
+			UpdatedAt: time.Now(),
 		},
 	}
 

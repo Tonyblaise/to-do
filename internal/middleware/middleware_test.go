@@ -17,10 +17,11 @@ func okHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-
-
 func TestAuth_MissingHeader(t *testing.T) {
-	handler := Auth(testSecret)(http.HandlerFunc(okHandler))
+	token, err := auth.GenerateToken("uid", "a@b.com", "other-secret", time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
@@ -54,6 +55,7 @@ func TestAuth_InvalidToken(t *testing.T) {
 	}
 }
 
+
 func TestAuth_WrongSecret(t *testing.T) {
 	token, _ := auth.GenerateToken("uid", "a@b.com", "other-secret", time.Hour)
 	handler := Auth(testSecret)(http.HandlerFunc(okHandler))
@@ -66,8 +68,6 @@ func TestAuth_WrongSecret(t *testing.T) {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
 }
-
-func TestAuth_ValidToken(t *testing.T) {
 	token, err := auth.GenerateToken("user-123", "test@example.com", testSecret, time.Hour)
 	if err != nil {
 		t.Fatal(err)
@@ -105,8 +105,6 @@ func TestAuth_ExpiredToken(t *testing.T) {
 	}
 }
 
-
-
 func TestGetUserID_WithValue(t *testing.T) {
 	ctx := context.WithValue(context.Background(), ContextKeyUserID, "abc-123")
 	if id := GetUserID(ctx); id != "abc-123" {
@@ -119,8 +117,6 @@ func TestGetUserID_Empty(t *testing.T) {
 		t.Errorf("expected empty string, got %q", id)
 	}
 }
-
-
 
 func TestRequestID_GeneratesID(t *testing.T) {
 	handler := RequestID(http.HandlerFunc(okHandler))
@@ -160,8 +156,6 @@ func TestRequestID_UniquePerRequest(t *testing.T) {
 		t.Errorf("expected unique IDs, both got %q", id1)
 	}
 }
-
-
 
 func TestRateLimit_AllowsUnderLimit(t *testing.T) {
 	cfg := &config.Config{RateLimitRequests: 5, RateLimitWindow: time.Minute}

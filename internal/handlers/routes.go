@@ -3,7 +3,9 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"os"
 
+	_ "github.com/Tonyblaise/to-do/docs"
 	"github.com/Tonyblaise/to-do/internal/config"
 	"github.com/Tonyblaise/to-do/internal/middleware"
 	"github.com/Tonyblaise/to-do/internal/repository"
@@ -12,7 +14,6 @@ import (
 )
 
 func RegisterRoutes(r *mux.Router, db *sql.DB, cfg *config.Config) {
-
 
 	userRepo := repository.NewUserRepository(db)
 	taskRepo := repository.NewTaskRepository(db)
@@ -26,19 +27,17 @@ func RegisterRoutes(r *mux.Router, db *sql.DB, cfg *config.Config) {
 	tagH := NewTagHandler(tagRepo)
 	attachH := NewAttachmentHandler(attachRepo, taskRepo, cfg)
 
-
 	authMW := middleware.Auth(cfg.JWTSecret)
 
 	api := r.PathPrefix("/api/v1").Subrouter()
 
 	api.HandleFunc("/health", HealthCheck(db)).Methods(http.MethodGet)
 
-    api.HandleFunc("/auth/signup", authH.Signup).Methods(http.MethodPost)
+	api.HandleFunc("/auth/signup", authH.Signup).Methods(http.MethodPost)
 	api.HandleFunc("/auth/login", authH.Login).Methods(http.MethodPost)
 
+	protected := api.NewRoute().Subrouter{}
 
-	protected := api.NewRoute().Subrouter()
-	
 	protected.Use(authMW)
 
 	protected.HandleFunc("/tasks", taskH.Create).Methods(http.MethodPost)
@@ -53,18 +52,17 @@ func RegisterRoutes(r *mux.Router, db *sql.DB, cfg *config.Config) {
 	protected.HandleFunc("/tasks/{id}/status", taskH.UpdateStatus).Methods(http.MethodPatch)
 	protected.HandleFunc("/tasks/{id}/attachments", attachH.Upload).Methods(http.MethodPost)
 
-
 	protected.HandleFunc("/tags", tagH.Create).Methods(http.MethodPost)
 	protected.HandleFunc("/tags", tagH.List).Methods(http.MethodGet)
 	protected.HandleFunc("/tags/{id}", tagH.Delete).Methods(http.MethodDelete)
 
-	
 	protected.HandleFunc("/attachments/{id}", attachH.Download).Methods(http.MethodGet)
 	protected.HandleFunc("/attachments/{id}", attachH.Delete).Methods(http.MethodDelete)
 
-	
 	r.HandleFunc("/ws", authMW(http.HandlerFunc(hub.WSHandler)).ServeHTTP)
 
 	// Swagger UI
-	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	if os.Getenv("ENV") != "production" {
+		r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	}
 }

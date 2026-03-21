@@ -12,16 +12,14 @@ import (
 	"github.com/Tonyblaise/to-do/internal/auth"
 )
 
-
 func validAuthHeader(t *testing.T) string {
 	t.Helper()
 	token, err := auth.GenerateToken("user-test-id", "test@example.com", "test-secret-key", time.Hour)
 	if err != nil {
 		t.Fatalf("auth.GenerateToken: %v", err)
 	}
-	return "Bearer" + token
+	return "Bearer " + token
 }
-
 
 func TestProtectedRoutes_NoAuth(t *testing.T) {
 	srv := newTestServer(t)
@@ -68,7 +66,6 @@ func TestProtectedRoutes_NoAuth(t *testing.T) {
 	}
 }
 
-
 func TestProtectedRoutes_InvalidToken(t *testing.T) {
 	srv := newTestServer(t)
 
@@ -81,8 +78,6 @@ func TestProtectedRoutes_InvalidToken(t *testing.T) {
 		t.Errorf("expected 401, got %d", w.Code)
 	}
 }
-
-
 
 func TestCreateTask_InvalidJSON(t *testing.T) {
 	srv := newTestServer(t)
@@ -128,8 +123,6 @@ func TestCreateTask_InvalidPriority(t *testing.T) {
 	}
 }
 
-
-
 func TestUpdateStatus_InvalidJSON(t *testing.T) {
 	srv := newTestServer(t)
 
@@ -158,7 +151,6 @@ func TestUpdateStatus_InvalidStatus(t *testing.T) {
 		t.Errorf("expected 400, got %d", w.Code)
 	}
 }
-
 
 func TestBulkUpdate_InvalidJSON(t *testing.T) {
 	srv := newTestServer(t)
@@ -189,8 +181,6 @@ func TestBulkUpdate_EmptyTaskIDs(t *testing.T) {
 	}
 }
 
-
-
 func TestBulkDelete_InvalidJSON(t *testing.T) {
 	srv := newTestServer(t)
 
@@ -220,8 +210,6 @@ func TestBulkDelete_EmptyTaskIDs(t *testing.T) {
 	}
 }
 
-
-
 func TestSync_MissingLastSyncedAt(t *testing.T) {
 	srv := newTestServer(t)
 
@@ -247,8 +235,6 @@ func TestSync_InvalidTimestamp(t *testing.T) {
 		t.Errorf("expected 400, got %d", w.Code)
 	}
 }
-
-
 
 func TestCreateTag_InvalidJSON(t *testing.T) {
 	srv := newTestServer(t)
